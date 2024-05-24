@@ -1,0 +1,55 @@
+name: 'Build'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'   
+
+      - name: Start and Test
+        run: |
+          node server.js &
+          npm test
+  deploy:
+    env: 
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      USER_NAME: ${{ secrets.USER_NAME }}
+      HOST: ${{ secrets.HOST }}
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install SSH client
+        run: sudo apt-get install -y openssh-client
+
+      - name: Get SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ env.PRIVATE_KEY }}
+
+      - name: Add EC2 host to known hosts
+        run: ssh-keyscan -H ${{env.HOST}}>> ~/.ssh/known_hosts
+  
+      
+      - name: Deploy to EC2
+        run: |
+          ssh ${{env.USER_NAME}}@${{env.HOST}} "cd ~ && cd actions && git pull origin main && sudo pm2 restart 0 && sudo pm2 flush"
