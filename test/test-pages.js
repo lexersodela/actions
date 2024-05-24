@@ -3,7 +3,7 @@ import request from 'request';
 
 it('Hello world test', function (done) {
     request('http://localhost:3000', function (error, response, body) {
-        expect(body).to.equal("Hi! I'm built using CI / CD!");
+        expect(body).to.equal("Vathanak not good");
         done();
     });
 });
