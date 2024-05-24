@@ -1,4 +1,4 @@
-name: 'Simple CI/CD'
+name: 'Build'
 
 on:
   push:
@@ -26,8 +26,3 @@ jobs:
         run: |
           node server.js &
           npm test
-
-      - name: Deploy
-        run: |
-          echo "Deploying to production..."
-          echo "Deployed successfully!"
